@@ -1,5 +1,8 @@
 {
   "wispPath": "/wisp/",
+  "allowedHosts": [
+    "*"
+  ],
   "allowedOrigins": [
     "https://*.github.io",
     "http://localhost:*",
