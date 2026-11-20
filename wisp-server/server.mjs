@@ -115,8 +115,8 @@ wisp.options.allow_direct_ip = true;
 wisp.options.allow_private_ips = true;
 wisp.options.allow_loopback_ips = true;
 
-wisp.options.stream_limit_per_host = Number(config.streamLimitPerHost) || 8;
-wisp.options.stream_limit_total = Number(config.streamLimitTotal) || 32;
+wisp.options.stream_limit_per_host = -1;
+wisp.options.stream_limit_total = -1;
 
 const logLevel = String(
   process.env.WISP_LOG_LEVEL ?? config.logLevel ?? "WARN"
