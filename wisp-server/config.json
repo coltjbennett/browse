@@ -1,0 +1,17 @@
+{
+  "wispPath": "/wisp/",
+  "allowedHosts": [
+    "developer.mozilla.org",
+    "example.com",
+    "www.w3.org"
+  ],
+  "allowedOrigins": [
+    "https://*.github.io",
+    "http://localhost:*",
+    "http://127.0.0.1:*"
+  ],
+  "allowedPorts": [443],
+  "streamLimitPerHost": 8,
+  "streamLimitTotal": 32,
+  "logLevel": "WARN"
+}
