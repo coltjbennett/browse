@@ -1,3 +1,4 @@
+
 import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -55,13 +56,22 @@ function wildcardPattern(value) {
 }
 
 const wispPath = validatePath(process.env.WISP_PATH ?? config.wispPath);
-const allowedHosts = envList("ALLOWED_HOSTS", config.allowedHosts).map(validateHostname);
+
+// TEMPORARY TESTING: Hostname validation disabled.
+// Restore this line when testing is complete.
+// const allowedHosts = envList("ALLOWED_HOSTS", config.allowedHosts).map(validateHostname);
+
 const allowedOrigins = envList("ALLOWED_ORIGINS", config.allowedOrigins);
 const allowedPorts = config.allowedPorts;
 
+// TEMPORARY TESTING: Hostname requirement disabled.
+// Restore this check when testing is complete.
+/*
 if (allowedHosts.length === 0) {
   throw new Error("At least one allowed hostname is required. Refusing to start an unrestricted Wisp server.");
 }
+*/
+
 if (!Array.isArray(allowedPorts) || allowedPorts.length === 0 || allowedPorts.some((port) => !Number.isInteger(port) || port < 1 || port > 65535)) {
   throw new Error("config.allowedPorts must be a non-empty array of valid TCP port numbers.");
 }
@@ -72,15 +82,21 @@ if (!Array.isArray(allowedOrigins) || allowedOrigins.length === 0) {
 const originPatterns = allowedOrigins.map(wildcardPattern);
 const port = Number.parseInt(process.env.PORT ?? "5001", 10);
 const host = process.env.HOST ?? "0.0.0.0";
+
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error(`Invalid PORT value: ${process.env.PORT}`);
 }
 
-// These are documented Wisp server options. In particular, direct IP, private,
-// loopback, and UDP connections are disabled. The server allowlist is enforced
-// here; the browser-side allowlist is only a usability guardrail.
+// These are documented Wisp server options.
+// Direct IP, private, loopback, and UDP connections remain disabled.
+// The browser-side allowlist is only a usability guardrail.
+
 wisp.options.wisp_version = 2;
-wisp.options.hostname_whitelist = allowedHosts.map(hostnamePattern);
+
+// TEMPORARY TESTING: Wisp hostname whitelist disabled.
+// Restore this line when testing is complete.
+// wisp.options.hostname_whitelist = allowedHosts.map(hostnamePattern);
+
 wisp.options.port_whitelist = allowedPorts;
 wisp.options.allow_tcp_streams = true;
 wisp.options.allow_udp_streams = false;
@@ -91,6 +107,7 @@ wisp.options.stream_limit_per_host = Number(config.streamLimitPerHost) || 8;
 wisp.options.stream_limit_total = Number(config.streamLimitTotal) || 32;
 
 const logLevel = String(process.env.WISP_LOG_LEVEL ?? config.logLevel ?? "WARN").toUpperCase();
+
 const levels = {
   DEBUG: logging.DEBUG,
   INFO: logging.INFO,
@@ -98,9 +115,11 @@ const levels = {
   ERROR: logging.ERROR,
   NONE: logging.NONE
 };
+
 if (!(logLevel in levels)) {
   throw new Error(`Unsupported WISP_LOG_LEVEL: ${logLevel}. Use DEBUG, INFO, WARN, ERROR, or NONE.`);
 }
+
 logging.set_level(levels[logLevel]);
 
 function jsonResponse(response, status, payload) {
@@ -116,12 +135,14 @@ function jsonResponse(response, status, payload) {
 
 function matchesAllowedOrigin(origin) {
   if (typeof origin !== "string" || origin === "null") return false;
+
   let parsed;
   try {
     parsed = new URL(origin);
   } catch {
     return false;
   }
+
   if (!(["http:", "https:"].includes(parsed.protocol)) || parsed.origin !== origin) return false;
   return originPatterns.some((pattern) => pattern.test(origin));
 }
@@ -137,6 +158,7 @@ function rejectUpgrade(socket, status, message) {
     "",
     body
   ].join("\r\n");
+
   socket.end(response);
 }
 
@@ -149,7 +171,8 @@ const app = http.createServer((request, response) => {
       service: "scramjet-classroom-wisp-server",
       protocol: "Wisp v2",
       websocketPath: wispPath,
-      allowedHostCount: allowedHosts.length
+      // allowedHostCount: allowedHosts.length,
+      hostnameRestriction: "TEMPORARILY DISABLED"
     });
   }
 
@@ -159,6 +182,7 @@ const app = http.createServer((request, response) => {
       "cache-control": "no-store",
       "x-content-type-options": "nosniff"
     });
+
     return response.end(`Classroom Wisp server is running. WebSocket endpoint: ${wispPath}\nHealth: /healthz\n`);
   }
 
@@ -167,6 +191,7 @@ const app = http.createServer((request, response) => {
 
 app.on("upgrade", (request, socket, head) => {
   let pathname;
+
   try {
     pathname = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`).pathname;
   } catch {
@@ -179,11 +204,13 @@ app.on("upgrade", (request, socket, head) => {
 
   const upgrade = String(request.headers.upgrade ?? "").toLowerCase();
   const connection = String(request.headers.connection ?? "").toLowerCase();
+
   if (upgrade !== "websocket" || !connection.split(",").map((part) => part.trim()).includes("upgrade")) {
     return rejectUpgrade(socket, "400 Bad Request", "A WebSocket upgrade is required.");
   }
 
   const origin = request.headers.origin;
+
   if (!matchesAllowedOrigin(origin)) {
     console.warn(`[Wisp] Rejected WebSocket upgrade from disallowed Origin: ${origin ?? "(missing)"}`);
     return rejectUpgrade(socket, "403 Forbidden", "This Origin is not permitted by the classroom server configuration.");
@@ -210,7 +237,7 @@ app.listen(port, host, () => {
   console.log(`[Wisp] Listening on http://${host}:${port}`);
   console.log(`[Wisp] WebSocket path: ${wispPath}`);
   console.log(`[Wisp] Wisp protocol version: 2`);
-  console.log(`[Wisp] Allowed destinations: ${allowedHosts.join(", ")}`);
+  console.warn("[Wisp] WARNING: Hostname whitelist temporarily disabled for testing.");
   console.log(`[Wisp] Allowed TCP ports: ${allowedPorts.join(", ")}`);
   console.log(`[Wisp] Allowed browser Origins: ${allowedOrigins.join(", ")}`);
   console.log("[Wisp] UDP, direct-IP, private-IP, and loopback destinations are disabled.");
@@ -218,12 +245,14 @@ app.listen(port, host, () => {
 
 function shutdown(signal) {
   console.log(`[Wisp] Received ${signal}; closing server.`);
+
   app.close((error) => {
     if (error) {
       console.error("[Wisp] Error while closing HTTP server:", error);
       process.exitCode = 1;
     }
   });
+
   const forceExit = setTimeout(() => process.exit(1), 10_000);
   forceExit.unref();
 }
