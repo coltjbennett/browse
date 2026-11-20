@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101827">
+    <meta name="description" content="A private Scramjet and Wisp classroom networking demonstration.">
+    <title>Scramjet Classroom Browser</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./static/config.js"></script>
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true">S</div>
+        <div class="brand-copy">
+          <h1>Scramjet Browser Lab</h1>
+          <p>Private classroom demonstration</p>
+        </div>
+        <div id="runtime-status" class="status-pill pending" role="status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="runtime-status-text">Starting runtime…</span>
+        </div>
+      </header>
+
+      <section class="connection-panel" aria-labelledby="connection-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">TRANSPORT</p>
+            <h2 id="connection-heading">Wisp connection</h2>
+          </div>
+          <span class="config-tag">Endpoint is configurable</span>
+        </div>
+        <form id="connect-form" class="connection-form">
+          <label class="sr-only" for="wisp-endpoint">Full Wisp WebSocket endpoint</label>
+          <input
+            id="wisp-endpoint"
+            name="wisp-endpoint"
+            type="url"
+            inputmode="url"
+            autocomplete="url"
+            spellcheck="false"
+            placeholder="wss://wisp-server-rk4m.onrender.com/your-configured-path/"
+            aria-describedby="wisp-help"
+          >
+          <button id="connect-button" class="button button-primary" type="submit">Connect</button>
+        </form>
+        <p id="wisp-help" class="help-text">
+          Host supplied: <code>wisp-server-rk4m.onrender.com</code>. Enter the actual path configured by the Wisp server operator, including its trailing slash. The path has not been verified here.
+        </p>
+      </section>
+
+      <section class="browser-panel" aria-label="Browser controls and content">
+        <form id="address-form" class="address-row">
+          <div class="navigation-buttons">
+            <button id="back-button" class="icon-button" type="button" aria-label="Back" title="Back" disabled>‹</button>
+            <button id="forward-button" class="icon-button" type="button" aria-label="Forward" title="Forward" disabled>›</button>
+            <button id="reload-button" class="icon-button" type="button" aria-label="Reload" title="Reload" disabled>↻</button>
+          </div>
+          <label class="sr-only" for="address-input">Address</label>
+          <input
+            id="address-input"
+            name="address"
+            type="text"
+            inputmode="url"
+            autocomplete="url"
+            spellcheck="false"
+            value="https://developer.mozilla.org/"
+            placeholder="https://developer.mozilla.org/"
+          >
+          <button id="go-button" class="button button-primary go-button" type="submit">Go</button>
+        </form>
+
+        <div class="frame-toolbar">
+          <div id="page-status" class="page-status" role="status" aria-live="polite">Waiting for a Wisp endpoint.</div>
+          <span class="frame-label">SCRAMJET FRAME</span>
+        </div>
+        <div class="frame-wrap">
+          <iframe
+            id="browser-frame"
+            title="Scramjet proxied demonstration page"
+            referrerpolicy="no-referrer"
+            allow="fullscreen"
+            src="about:blank"
+          ></iframe>
+          <div id="frame-placeholder" class="frame-placeholder">
+            <div class="placeholder-icon" aria-hidden="true">↗</div>
+            <h2>Ready for a demonstration</h2>
+            <p>Configure the Wisp WebSocket endpoint, connect the transport, then open an approved demonstration domain.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="details-grid">
+        <article class="info-card">
+          <p class="eyebrow">APPROVED DEMONSTRATIONS</p>
+          <h2>Address-bar allowlist</h2>
+          <p>The address bar accepts only the hostnames configured in <code>static/config.js</code>. Current entries:</p>
+          <ul id="allowlist" class="domain-list"></ul>
+          <p class="caution-text">This is a client-side navigation guardrail, not a security boundary. Redirects, subresources, in-frame links, modified client code, or direct requests may not be constrained by it. Enforce any real classroom policy on the Wisp server/network side.</p>
+        </article>
+        <article class="info-card log-card">
+          <div class="log-heading">
+            <div>
+              <p class="eyebrow">DIAGNOSTICS</p>
+              <h2>Activity log</h2>
+            </div>
+            <button id="clear-log-button" class="text-button" type="button">Clear</button>
+          </div>
+          <ol id="activity-log" class="activity-log" aria-live="polite">
+            <li>Waiting for runtime initialization.</li>
+          </ol>
+        </article>
+      </section>
+
+      <footer class="footer-note">
+        Educational demo only. GitHub Pages hosts the static UI and runtime assets; the Wisp service is separate and must be available over secure WebSockets.
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "scramjet-browser-classroom-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A static Scramjet browser-in-browser demonstration with a separately hosted Wisp endpoint.",
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.2.0"
+  },
+  "scripts": {
+    "setup:proxy": "node scripts/setup-proxy.js",
+    "build": "node scripts/build.js",
+    "check": "node scripts/check-project.js",
+    "dev": "node scripts/serve.js"
+  },
+  "proxyRuntime": {
+    "@mercuryworkshop/scramjet": "2.0.67-alpha.2",
+    "@mercuryworkshop/scramjet-controller": "0.0.14",
+    "@mercuryworkshop/libcurl-transport": "2.0.6"
+  }
+}
