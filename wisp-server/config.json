@@ -9,7 +9,7 @@
     "http://127.0.0.1:*"
   ],
   "allowedPorts": [443],
-  "streamLimitPerHost": 8,
-  "streamLimitTotal": 32,
+  "streamLimitPerHost": -1,
+  "streamLimitTotal": -1,
   "logLevel": "WARN"
 }
