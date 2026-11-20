@@ -1,3 +1,4 @@
+
 const config = window.SCRAMJET_APP_CONFIG ?? {};
 const APP_BASE = new URL("./", import.meta.url);
 const allowedDomains = Array.isArray(config.allowedDomains) ? config.allowedDomains : [];
@@ -145,7 +146,7 @@ async function initializeRuntime() {
   runtimeReady = true;
   setRuntimeStatus("Runtime ready; Wisp not connected", "good");
   log("Service Worker is controlling this page. Scramjet runtime initialized.");
-  setPageStatus("Enter the configured Wisp endpoint, connect, then browse an approved domain.");
+  setPageStatus("Enter the configured Wisp endpoint, connect, then browse an allowed domain.");
 }
 
 function normalizeTarget(rawValue) {
@@ -159,8 +160,8 @@ function normalizeTarget(rawValue) {
     throw new Error(`That address is not a valid URL: ${error.message}`);
   }
 
-  if (target.protocol !== "https:") {
-    throw new Error("For this classroom build, demonstration targets must use HTTPS.");
+  if (!["https:", "http:"].includes(target.protocol)) {
+    throw new Error("Only HTTP and HTTPS demonstration targets are supported.");
   }
   if (target.username || target.password) {
     throw new Error("Do not include a username or password in a demonstration URL.");
@@ -169,11 +170,18 @@ function normalizeTarget(rawValue) {
   const allowed = allowedDomains.some((domain) => {
     const host = String(domain).toLowerCase().trim();
     const targetHost = target.hostname.toLowerCase();
-    return host && (targetHost === host || targetHost.endsWith(`.${host}`));
+
+    // TEMPORARY TESTING: "*" allows every hostname.
+    if (host === "*") return true;
+
+    return host && (
+      targetHost === host ||
+      targetHost.endsWith(`.${host}`)
+    );
   });
 
   if (!allowed) {
-    throw new Error(`Host “${target.hostname}” is not in the address-bar allowlist. Edit static/config.js to add an approved classroom demo host.`);
+    throw new Error(`Host "${target.hostname}" is not in the address-bar allowlist. Check static/config.js.`);
   }
 
   return target;
