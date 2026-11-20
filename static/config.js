@@ -6,11 +6,9 @@
 window.SCRAMJET_APP_CONFIG = Object.freeze({
   wispEndpoint: "wss://wisp-server-rk4m.onrender.com/wisp/",
   wispHostHint: "wisp-server-rk4m.onrender.com",
-  defaultTarget: "https://developer.mozilla.org/",
+  defaultTarget: "https://google.com",
   allowedDomains: [
-    "developer.mozilla.org",
-    "example.com",
-    "www.w3.org"
+    "*"
   ],
   keepAliveIntervalMs: 25000,
   serviceWorkerReadyTimeoutMs: 15000
